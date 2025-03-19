@@ -92,7 +92,7 @@ class Mem0Editor(MemoryEditor):
                 MemoryItem(conversation=res.pop("input", []),
                            user_id=user_id,
                            memory=res["memory"],
-                           tags=res.pop("categories", []),
+                           tags=res.pop("categories", []) or [],
                            metadata=item_meta))
 
         return memories
