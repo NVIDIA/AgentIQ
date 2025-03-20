@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+general:
+  use_uvloop: true
+
+functions:
+  webpage_query:
+    _type: webpage_query
+    webpage_url: https://docs.smith.langchain.com/user_guide
+    description: "Search for information about LangSmith. For any questions about LangSmith, you must use this tool!"
+    embedder_name: nv-embedqa-e5-v5
+  current_datetime:
+    _type: current_datetime
+
+llms:
+  nim_llm:
+    _type: nim
+    model_name: meta/llama-3.1-70b-instruct
+    temperature: 0.0
+  nim_rag_eval_llm:
+    _type: nim
+    model_name: meta/llama-3.3-70b-instruct
+    temperature: 0.0000001
+    top_p: 0.0001
+    max_tokens: 2
+  nim_trajectory_eval_llm:
+    _type: nim
+    model_name: meta/llama-3.1-70b-instruct
+    temperature: 0.0
+    max_tokens: 1024
+  openai_llm:
+    _type: openai
+    model_name: gpt-4o-mini
+    max_tokens: 1024
+
+embedders:
+  nv-embedqa-e5-v5:
+    _type: nim
+    model_name: nvidia/nv-embedqa-e5-v5
+
+workflow:
+  _type: react_agent
+  tool_names: [webpage_query, current_datetime]
+  llm_name: openai_llm
+  verbose: true
+  retry_parsing_errors: true
+  max_retries: 3
+
+eval:
+  general:
+    output_dir: ./.tmp/aiq/examples/simple/
+    max_concurrency: 4
+    dataset:
+      _type: json
+      file_path: examples/simple/data/langsmith.json
+      # file_path: examples/simple/data/simple_questions.json
+
+  evaluators:
+    rag_accuracy:
+      _type: ragas
+      metric: AnswerAccuracy
+      llm_name: nim_rag_eval_llm
+    rag_groundedness:
+      _type: ragas
+      metric: ResponseGroundedness
+      llm_name: nim_rag_eval_llm
+    rag_relevance:
+      _type: ragas
+      metric: ContextRelevance
+      llm_name: nim_rag_eval_llm
+    trajectory_accuracy:
+      _type: trajectory
+      llm_name: nim_trajectory_eval_llm

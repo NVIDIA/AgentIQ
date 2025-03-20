@@ -30,6 +30,7 @@ class EvaluationRunConfig(BaseModel):
     endpoint: str | None  # only used when running the workflow remotely
     endpoint_timeout: int
     reps: int
+    generate_ground_truth: bool
 
 
 class EvaluationRunOutput(BaseModel):
@@ -39,3 +40,4 @@ class EvaluationRunOutput(BaseModel):
     workflow_output_file: Path | None
     evaluator_output_files: list[Path]
     workflow_interrupted: bool
+    generated_ground_truth_file: Path | None

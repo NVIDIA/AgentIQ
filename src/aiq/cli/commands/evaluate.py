@@ -77,6 +77,13 @@ logger = logging.getLogger(__name__)
     default=1,
     help="Number of repetitions for the evaluation.",
 )
+@click.option(
+    "--generate_ground_truth",
+    is_flag=True,
+    default=False,
+    help="Generate ground truth dataset based on evaluation results. \
+        Can be used with --reps greater than 1 to get the best answer.",
+)
 @click.pass_context
 def eval_command(ctx, **kwargs) -> None:
     """ Evaluate datasets with the specified mechanism"""
@@ -101,6 +108,7 @@ def process_aiq_eval(
     endpoint: str,
     endpoint_timeout: int,
     reps: int,
+    generate_ground_truth: bool,
 ):
     """
     Process the eval command and execute the evaluation. Here the config_file, if provided, is checked for its existence
@@ -127,5 +135,6 @@ def process_aiq_eval(
         endpoint=endpoint,
         endpoint_timeout=endpoint_timeout,
         reps=reps,
+        generate_ground_truth=generate_ground_truth,
     )
     asyncio.run(run_and_evaluate(config))
