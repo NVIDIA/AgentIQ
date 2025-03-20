@@ -104,7 +104,7 @@ Before you begin using AgentIQ, ensure that you meet the following software prer
 
     In addition to plugins, there are optional dependencies needed for profiling. To install these dependencies, run the following:
     ```bash
-    uv pip install -e .[profiling]
+    uv pip install -e '.[profiling]'
     ```
 
 6. Verify the installation using the AgentIQ CLI
