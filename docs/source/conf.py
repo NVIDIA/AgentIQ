@@ -171,6 +171,7 @@ html_theme = "nvidia_sphinx_theme"
 # documentation.
 
 html_logo = '_static/main_nv_logo_square.png'
+html_title = f'{project} ({version})'
 
 html_theme_options = {
     'collapse_navigation': False,
@@ -283,16 +284,3 @@ def skip_pydantic_special_attrs(app: object, what: str, name: str, obj: "PythonO
 def setup(sphinx):
     # Work-around for for Pydantic docstrings that trigger parsing warnings
     sphinx.connect("autoapi-skip-member", skip_pydantic_special_attrs)
-
-    # Work-around for performance issue with nvidia_sphinx_theme when parallel_read_safe is True
-    import nvidia_sphinx_theme
-
-    orig_setup = nvidia_sphinx_theme.setup
-
-    def work_around_theme_settings(sphinx):
-        theme_settings = orig_setup(sphinx)
-        theme_settings['parallel_read_safe'] = False
-
-        return theme_settings
-
-    nvidia_sphinx_theme.setup = work_around_theme_settings
