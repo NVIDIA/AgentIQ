@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import json
+from collections import defaultdict
 
 import pandas as pd
 
@@ -24,6 +25,7 @@ from aiq.eval.dataset_handler.dataset_downloader import DatasetDownloader
 from aiq.eval.dataset_handler.dataset_filter import DatasetFilter
 from aiq.eval.evaluator.evaluator_model import EvalInput
 from aiq.eval.evaluator.evaluator_model import EvalInputItem
+from aiq.eval.evaluator.evaluator_model import EvalOutput
 
 
 class DatasetHandler:
@@ -88,6 +90,8 @@ class DatasetHandler:
 
         structured = self.is_structured_input()
         if structured:
+            # Fill missing ground truth answers with empty string
+            input_df[self.answer_key] = input_df[self.answer_key].fillna("")
             # For structured input, question is mandatory. Ignore rows with missing or empty questions
             input_df = input_df[input_df[self.question_key].notnull() & input_df[self.question_key].str.strip().ne("")]
         eval_input_items = [create_eval_item(row, structured) for _, row in input_df.iterrows()]
@@ -162,3 +166,84 @@ class DatasetHandler:
             data = [json.loads(item.output_obj) for item in eval_input.eval_input_items]
 
         return json.dumps(data, indent=indent, ensure_ascii=False)
+
+    def publish_ground_truth(self, eval_input) -> str | None:
+        """
+        Convert the EvalInput object to a JSON output for storing in a file. Use the orginal keys to
+        allow re-running evaluation using the orignal config file and '--skip_workflow' option.
+        """
+        indent = 2
+        if not self.is_structured_input():
+            None
+
+        # Extract structured data from EvalInputItems
+        data = [{
+            self.id_key: item.id,
+            self.question_key: item.input_obj,
+            self.answer_key: item.expected_output_obj,
+        } for item in eval_input.eval_input_items]
+
+        return json.dumps(data, indent=indent, ensure_ascii=False)
+
+    def generate_ground_truth(self, original_eval_input: EvalInput,
+                              evaluation_results: list[tuple[str, EvalOutput]]) -> EvalInput:
+        """
+        Generate a ground truth EvalInput based on the evaluation results from multiple evaluators.
+
+        1. Each evaluator's result can have multiple repetitions for the same `id_key`.
+           Reps are stored with `id_key = id_key + "_rep" + rep_number`.
+        2. The average score is computed per-repetition across all evaluators.
+        3. The repetition with the highest average score is selected.
+        4. The best repetitions replace the original input items, and a new EvalInput is returned.
+        """
+        if not self.is_structured_input():
+            return None
+
+        if self.reps == 1:
+            # Directly use original_eval_input since there's only one repetition
+            best_eval_items = [
+                EvalInputItem(
+                    id=item.id,
+                    input_obj=item.input_obj,
+                    expected_output_obj=item.expected_output_obj,  # Comes from original input
+                    output_obj=None,
+                    expected_trajectory=[],
+                    trajectory=[],
+                ) for item in original_eval_input.eval_input_items  # No dictionary needed
+            ]
+            return EvalInput(eval_input_items=best_eval_items)
+
+        # Aggregate scores for each rep across all evaluators
+        rep_scores = defaultdict(list)
+        for _, eval_output in evaluation_results:
+            for item in eval_output.eval_output_items:
+                rep_scores[item.id].append(item.score)
+
+        # Compute the average score per repetition
+        avg_scores_per_rep = {rep_id: sum(scores) / len(scores) for rep_id, scores in rep_scores.items()}
+
+        # Select the best repetition per original ID; if single rep, it is the best by default
+        best_reps = {}
+        for rep_id, avg_score in avg_scores_per_rep.items():
+            original_id = rep_id.rsplit("_rep", 1)[0] if "_rep" in rep_id else rep_id
+            if original_id not in best_reps or avg_score > best_reps[original_id][1]:
+                best_reps[original_id] = (rep_id, avg_score)
+
+        # Create a new EvalInput with original IDs using the best repetitions
+        best_eval_items = []
+        for id, (rep_id, _) in best_reps.items():
+            # Find the original item using the rep_id
+            for item in original_eval_input.eval_input_items:
+                if item.id == rep_id:  # Match the best rep_id
+                    # Use the generated answer as the ground truth/expected output
+                    best_eval_items.append(
+                        EvalInputItem(
+                            id=id,  # Assign the base ID, without the rep suffix
+                            input_obj=item.input_obj,
+                            expected_output_obj=item.output_obj,
+                            output_obj=None,
+                            expected_trajectory=[],
+                            trajectory=[],
+                        ))
+                    break
+        return EvalInput(eval_input_items=best_eval_items)

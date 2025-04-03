@@ -58,6 +58,10 @@ class EvaluationRun:  # pylint: disable=too-many-public-methods
         # evaluation_results is list of tuples (evaluator_name, EvalOutput)
         self.evaluation_results: list[tuple[str, EvalOutput]] = []
 
+        # generated ground truth
+        self.generated_ground_truth: EvalInput | None = None
+        self.generated_ground_truth_file: Path | None = None
+
         # workflow output file
         self.workflow_output_file: Path | None = None
 
@@ -188,6 +192,17 @@ class EvaluationRun:  # pylint: disable=too-many-public-methods
             self.evaluator_output_files.append(output_file)
             logger.info("Evaluation results written to %s", output_file)
 
+        # write the generated ground truth to a file
+        if self.generated_ground_truth:
+            generated_ground_truth_file = self.eval_config.general.output_dir / "generated_ground_truth.json"
+            generated_ground_truth_file.parent.mkdir(parents=True, exist_ok=True)
+            generated_ground_truth = dataset_handler.publish_ground_truth(self.generated_ground_truth)
+            if generated_ground_truth:
+                with open(generated_ground_truth_file, "w", encoding="utf-8") as f:
+                    f.write(generated_ground_truth)
+                self.generated_ground_truth_file = generated_ground_truth_file
+                logger.info("Generated ground truth written to %s", generated_ground_truth_file)
+
         if self.workflow_interrupted:
             # Issue a warning if the workflow was not completed on all datasets
             msg = ("Workflow execution was interrupted due to an error. The results may be incomplete. "
@@ -217,6 +232,17 @@ class EvaluationRun:  # pylint: disable=too-many-public-methods
             logger.exception("An error occurred while running evaluators: %s", e, exc_info=True)
             raise
 
+    def get_eval_run_output(self) -> EvaluationRunOutput:
+        """
+        Get the evaluation run output
+        """
+        return EvaluationRunOutput(
+            workflow_output_file=self.workflow_output_file,
+            evaluator_output_files=self.evaluator_output_files,
+            workflow_interrupted=self.workflow_interrupted,
+            generated_ground_truth_file=self.generated_ground_truth_file,
+        )
+
     async def run_and_evaluate(self) -> EvaluationRunOutput:
         """
         Run the workflow with the specified config file and evaluate the dataset
@@ -236,21 +262,13 @@ class EvaluationRun:  # pylint: disable=too-many-public-methods
         dataset_config = self.eval_config.general.dataset  # Currently only one dataset is supported
         if not dataset_config:
             logger.info("No dataset found, nothing to evaluate")
-            return EvaluationRunOutput(
-                workflow_output_file=self.workflow_output_file,
-                evaluator_output_files=self.evaluator_output_files,
-                workflow_interrupted=self.workflow_interrupted,
-            )
+            return self.get_eval_run_output()
 
         dataset_handler = DatasetHandler(dataset_config=dataset_config, reps=self.config.reps)
         self.eval_input = dataset_handler.get_eval_input_from_dataset(self.config.dataset)
         if not self.eval_input.eval_input_items:
             logger.info("Dataset is empty. Nothing to evaluate.")
-            return EvaluationRunOutput(
-                workflow_output_file=self.workflow_output_file,
-                evaluator_output_files=self.evaluator_output_files,
-                workflow_interrupted=self.workflow_interrupted,
-            )
+            return self.get_eval_run_output()
 
         # Run workflow and evaluate
         async with WorkflowEvalBuilder.from_config(config=config) as eval_workflow:
@@ -267,11 +285,12 @@ class EvaluationRun:  # pylint: disable=too-many-public-methods
         # Profile the workflow
         await self.profile_workflow()
 
+        if self.config.generate_ground_truth and self.evaluation_results:
+            # Generate ground truth dataset based on evaluation results
+            self.generated_ground_truth = \
+                dataset_handler.generate_ground_truth(self.eval_input, self.evaluation_results)
+
         # Write the results to the output directory
         self.write_output(dataset_handler)
 
-        return EvaluationRunOutput(
-            workflow_output_file=self.workflow_output_file,
-            evaluator_output_files=self.evaluator_output_files,
-            workflow_interrupted=self.workflow_interrupted,
-        )
+        return self.get_eval_run_output()
