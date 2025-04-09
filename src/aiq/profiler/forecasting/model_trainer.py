@@ -17,11 +17,11 @@
 
 import logging
 
-from aiq.data_models.intermediate_step import IntermediateStep
 from aiq.profiler.forecasting.config import DEFAULT_MODEL_TYPE
 from aiq.profiler.forecasting.models import ForecastingBaseModel
 from aiq.profiler.forecasting.models import LinearModel
 from aiq.profiler.forecasting.models import RandomForestModel
+from aiq.profiler.intermediate_property_adapter import IntermediatePropertyAdaptor
 
 logger = logging.getLogger(__name__)
 
@@ -44,23 +44,30 @@ class ModelTrainer:
     """
     Orchestrates data preprocessing, training, and returning
     a fitted model.
+
+    Parameters
+    ----------
+    model_type: str, default = "randomforest"
+        The type of model to train. Options include "linear" and "randomforest".
     """
 
     def __init__(self, model_type: str = DEFAULT_MODEL_TYPE):
-        """
-        model_type: e.g. "linear"
-        matrix_length: how many rows to keep or pad in each input matrix
-        """
         self.model_type = model_type
         self._model = create_model(self.model_type)
 
-    def train(self, raw_stats: list[list[IntermediateStep]]) -> ForecastingBaseModel:
+    def train(self, raw_stats: list[list[IntermediatePropertyAdaptor]]) -> ForecastingBaseModel:
         """
-        raw_matrices: a list of 2D arrays, each shaped (n_rows, 4)
-                      This is the 'unprocessed' data from the user.
+        Train the model using the `raw_stats` training data.
 
-        Returns:
-            A fitted model (BaseModel).
+        Parameters
+        ----------
+        raw_stats: list[list[IntermediatePropertyAdaptor]]
+            Stats collected by the profiler.
+
+        Returns
+        -------
+        ForecastingBaseModel
+            A fitted model.
         """
 
         self._model.fit(raw_stats)

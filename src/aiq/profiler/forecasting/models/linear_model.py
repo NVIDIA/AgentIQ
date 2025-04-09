@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# forecasting/models/linear_model.py
+import logging
 
 import numpy as np
+
 from aiq.profiler.forecasting.models.forecasting_base_model import ForecastingBaseModel
-import logging
-from aiq.data_models.intermediate_step import IntermediateStep
+from aiq.profiler.intermediate_property_adapter import IntermediatePropertyAdaptor
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class LinearModel(ForecastingBaseModel):
         self.model = LinearRegression()
         self.matrix_length = None
 
-    def fit(self, raw_stats: list[list[IntermediateStep]]):
+    def fit(self, raw_stats: list[list[IntermediatePropertyAdaptor]]):
         """
         X: shape (N, M)  # M = matrix_length * 4
         y: shape (N, 4)
@@ -54,7 +54,7 @@ class LinearModel(ForecastingBaseModel):
         # 3) Fit
         self.model.fit(x_flat, y_flat)
 
-    def predict(self, raw_stats: list[list[IntermediateStep]]) -> np.ndarray:
+    def predict(self, raw_stats: list[list[IntermediatePropertyAdaptor]]) -> np.ndarray:
         """
         Predict using the fitted linear model.
         Returns shape (N, 4)
@@ -62,7 +62,7 @@ class LinearModel(ForecastingBaseModel):
         X = self._prep_single(raw_stats)
         return self.model.predict(X)
 
-    def _prep_single(self, raw_stats) -> np.ndarray:
+    def _prep_single(self, raw_stats: list[list[IntermediatePropertyAdaptor]]) -> np.ndarray:
         arr, _ = self._extract_token_usage_meta(raw_stats)
         arr = arr[0]
         n_rows = arr.shape[0]
@@ -82,7 +82,7 @@ class LinearModel(ForecastingBaseModel):
 
         return x_mat
 
-    def _prep_for_model_training(self, raw_stats):
+    def _prep_for_model_training(self, raw_stats: list[list[IntermediatePropertyAdaptor]]):
         raw_matrices, matrix_length = self._extract_token_usage_meta(raw_stats)
 
         self.matrix_length = matrix_length
@@ -100,7 +100,7 @@ class LinearModel(ForecastingBaseModel):
 
         return x_flat, y_flat
 
-    def _extract_token_usage_meta(self, all_requests_data):
+    def _extract_token_usage_meta(self, all_requests_data: list[list[IntermediatePropertyAdaptor]]):
         import math
 
         all_run_data = []

@@ -20,15 +20,14 @@ from aiq.profiler.forecasting.model_trainer import create_model
 from aiq.profiler.forecasting.models import ForecastingBaseModel
 from aiq.profiler.forecasting.models import LinearModel
 from aiq.profiler.forecasting.models import RandomForestModel
+from aiq.profiler.intermediate_property_adapter import IntermediatePropertyAdaptor
 
 
-@pytest.mark.parametrize(
-    "model_type, expected_model_class",
-    [
-        ("linear", LinearModel),
-        ("randomforest", RandomForestModel),
-    ],
-)
+@pytest.mark.parametrize("model_type, expected_model_class", [
+    ("linear", LinearModel),
+    ("randomforest", RandomForestModel),
+],
+                         ids=["linear", "randomforest"])
 def test_create_model(model_type: str, expected_model_class: type[ForecastingBaseModel]):
     assert isinstance(create_model(model_type), expected_model_class)
 
@@ -51,3 +50,14 @@ def test_model_trainer_initialization(model_trainer_kwargs: dict):
     mt = ModelTrainer(**model_trainer_kwargs)
     if "model_type" in model_trainer_kwargs:
         assert mt.model_type == model_trainer_kwargs["model_type"]
+
+
+@pytest.mark.parametrize("model_type, expected_model_class", [("linear", LinearModel),
+                                                              ("randomforest", RandomForestModel)],
+                         ids=["linear", "randomforest"])
+def test_model_trainer_train(model_type: str,
+                             expected_model_class: type[ForecastingBaseModel],
+                             rag_intermediate_property_adaptor: list[list[IntermediatePropertyAdaptor]]):
+    mt = ModelTrainer(model_type=model_type)
+    model = mt.train(rag_intermediate_property_adaptor)
+    assert isinstance(model, expected_model_class)
