@@ -13,14 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=unused-import
-# flake8: noqa
-# isort:skip_file
+from aiq.builder.builder import Builder
+from aiq.builder.framework_enum import LLMFrameworkEnum
+from aiq.cli.register_workflow import register_embedder_client
+from aiq.embedder.openai_embedder import OpenAIEmbedderModelConfig
 
-# Import any providers which need to be automatically registered here
 
-from . import embedder
-from . import llm
-from . import tool_wrapper
-from . import retriever
-from .tools import register
+@register_embedder_client(config_type=OpenAIEmbedderModelConfig, wrapper_type=LLMFrameworkEnum.LANGCHAIN)
+async def openai_langchain(embedder_config: OpenAIEmbedderModelConfig, builder: Builder):
+
+    from langchain_openai import OpenAIEmbeddings
+
+    yield OpenAIEmbeddings(**embedder_config.model_dump(exclude={"type"}, by_alias=True))

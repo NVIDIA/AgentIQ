@@ -27,5 +27,6 @@ Add Custom Evaluators <./custom-evaluator.md>
 ./observe-workflow-with-phoenix.md
 Use User Interface and API Server <./using-agentiq-ui-and-server.md>
 Profile a Workflow <./profiler.md>
+Locally and Self-Hosted LLMs <./locally-hosted-llms.md>
 Adding an LLM Provider <./adding-an-llm-provider.md>
 ```

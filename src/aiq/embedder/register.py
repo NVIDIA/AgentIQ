@@ -19,5 +19,6 @@
 
 # Import any providers which need to be automatically registered here
 from . import nim_embedder
+from . import openai_embedder
 # Import any clients which need to be automatically registered here
 from . import langchain_client

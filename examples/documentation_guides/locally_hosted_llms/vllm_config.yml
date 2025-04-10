@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+functions:
+  webpage_query:
+    _type: webpage_query
+    webpage_url: https://docs.smith.langchain.com/user_guide
+    description: "Search for information about LangSmith. For any questions about LangSmith, you must use this tool!"
+    embedder_name: vllm_embedder
+    chunk_size: 512
+  current_datetime:
+    _type: current_datetime
+
+llms:
+  vllm_llm:
+    _type: openai
+    api_key: "EMPTY"
+    base_url: "http://localhost:8000/v1"
+    model_name: microsoft/Phi-3-mini-4k-instruct
+    max_tokens: 4096
+
+embedders:
+  vllm_embedder:
+    _type: openai
+    api_key: "EMPTY"
+    base_url: "http://localhost:8001/v1"
+    model_name: ssmits/Qwen2-7B-Instruct-embed-base
+
+workflow:
+  _type: react_agent
+  tool_names: [webpage_query, current_datetime]
+  llm_name: vllm_llm
+  verbose: true
+  retry_parsing_errors: true
+  max_retries: 3

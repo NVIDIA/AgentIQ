@@ -55,4 +55,4 @@ class NIMEmbedderModelConfig(EmbedderBaseConfig, name="nim"):
 @register_embedder_provider(config_type=NIMEmbedderModelConfig)
 async def nim_embedder_model(embedder_config: NIMEmbedderModelConfig, builder: Builder):
 
-    yield EmbedderProviderInfo(config=embedder_config, description="A NIM model for use with a Embedder client.")
+    yield EmbedderProviderInfo(config=embedder_config, description="A NIM model for use with an Embedder client.")
