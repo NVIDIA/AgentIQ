@@ -208,6 +208,55 @@ eval:
 ```
 The swe-bench evaluator uses unstructured dataset entries. The entire row is provided as input to the workflow.
 
+### Tunable RAG Evaluator
+The tunable RAG evaluator is a customizable LLM evaluator that allows for flexible evaluation of RAG workflows. 
+It includes a default scoring mechanism based on an expected answer description rather than a ground truth answer. 
+
+The judge LLM prompt is tunable and can be provided in the `config.yml` file.
+
+A default scoring method is provided as follows:
+- Coverage: Evaluates if the answer covers all mandatory elements of the expected answer.
+- Correctness: Evaluates if the answer is correct compared to the expected answer.
+- Relevance: Evaluates if the answer is relevant to the question.
+
+These weights can be optionally tuned by setting the `default_score_weights` parameter in the `config.yml` file. If not set, each score will be equally weighted.
+
+The default scoring can be overridden by setting the config boolean `default_scoring` to false and providing your own scoring mechanism which you describe in your custom judge LLM prompt.
+Note: if you do choose to use the default scoring method, you are still able to tune the judge LLM prompt.
+
+**Example:**
+```yaml
+eval:
+  evaluators:
+    custom_rag_evaluation:
+      _type: tunable_rag_evaluator
+      llm_name: nim_rag_eval_llm
+      default_scoring: false
+      default_score_weights:
+        coverage: 0.5
+        correctness: 0.3
+        relevance: 0.2
+      judge_llm_prompt: >
+        You are an intelligent evaluator that scores the generated answer based on the description of the expected answer.
+        The score is a measure of how well the generated answer matches the description of the expected answer based on the question.
+        Take into account the question, the relevance of the answer to the question and the quality compared to the description of the expected answer.
+
+        Rules:
+        - The score must be a float of any value between 0.0 and 1.0 on a sliding scale.
+        - The reasoning string must be concise and to the point. It should be 1 sentence and 2 only if extra description is needed. It must explain why the score was given and what is different between the generated answer and the expected answer.
+```
+
+Note: In your evaluation dataset, make sure that the `answer` field is a description of the expected answer with details on what is expected from the generated answer.
+
+**Example:**
+```json
+{
+  "id": 1,
+  "question": "What is the product of 3 and 7, and is it greater than the current hour?",
+  "answer": "Answer must have the answer of product of 3 and 7 and whether it is greater than the current hour"
+}
+```
+
 ## Adding Custom Evaluators
 You can add custom evaluators to evaluate the workflow output. To add a custom evaluator, you need to implement the evaluator and register it with the AgentIQ evaluator system. See the [Custom Evaluator](../guides/custom-evaluator.md) documentation for more information.
 

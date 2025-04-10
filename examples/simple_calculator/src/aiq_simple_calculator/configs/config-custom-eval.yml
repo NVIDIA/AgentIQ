@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+general:
+  use_uvloop: true
+
+functions:
+  calculator_multiply:
+    _type: calculator_multiply
+  calculator_inequality:
+    _type: calculator_inequality
+  calculator_divide:
+    _type: aiq_simple_calculator/calculator_divide
+  current_datetime:
+    _type: current_datetime
+
+llms:
+  nim_llm:
+    _type: nim
+    model_name: nvdev/meta/llama-3.1-70b-instruct
+    temperature: 0.0
+    max_tokens: 1024
+  eval_llm:
+    _type: nim
+    model_name: mistralai/mixtral-8x22b-instruct-v0.1
+    temperature: 0.0
+    max_tokens: 1024
+  openai_llm:
+    _type: openai
+    model_name: gpt-3.5-turbo
+    max_tokens: 2000
+
+workflow:
+  _type: react_agent
+  tool_names:
+    - calculator_multiply
+    - calculator_inequality
+    - current_datetime
+    - calculator_divide
+  llm_name: nim_llm
+  verbose: true
+  retry_parsing_errors: true
+  max_retries: 3
+
+
+eval:
+  general:
+    output_dir: examples/simple_calculator/.tmp/eval/simple_calculator
+    dataset:
+      _type: json
+      file_path: examples/simple_calculator/data/simple_calculator_questions_custom.json
+
+  evaluators:
+    custom_rag_evaluation:
+      _type: tunable_rag_evaluator
+      llm_name: nim_llm
+      default_scoring: true
+      default_score_weights:
+        coverage: 0.5
+        correctness: 0.3
+        relevance: 0.2
+      judge_llm_prompt: >
+        You are an intelligent evaluator that scores the generated answer based on the description of the expected answer.
+        The score is a measure of how well the generated answer matches the description of the expected answer based on the question.
+        Take into account the question, the relevance of the answer to the question and the quality compared to the description of the expected answer.
+
+        Rules:
+        - The score must be a float of any value between 0.0 and 1.0 on a sliding scale.
+        - The reasoning string must be concise and to the point. It should be 1 sentence and 2 only if extra description is needed. It must explain why the score was given and what is different between the generated answer and the expected answer.
+        - The tags <image> and <chart> are real images and charts.

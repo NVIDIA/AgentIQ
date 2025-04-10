@@ -20,3 +20,4 @@
 from .rag_evaluator.register import register_ragas_evaluator
 from .swe_bench_evaluator.register import register_swe_bench_evaluator
 from .trajectory_evaluator.register import register_trajectory_evaluator
+from .custom_rag_evaluator.register import register_custom_rag_evaluator
