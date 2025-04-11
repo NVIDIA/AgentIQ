@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "question":
+            "Which city held the Olympic game in the year represented by the bigger number of 1996 and 2004?",
+        "answer":
+            "athens"
+    },
+    {
+        "id": 2,
+        "question": "Which U.S. historical event occurred in the year obtained by multiplying 48 and 37?",
+        "answer": "declaration of independence"
+    },
+    {
+        "id": 3,
+        "question": "Which country hosted the FIFA World Cup in the year obtained by dividing 6054 by 3?",
+        "answer": "russia"
+    },
+    {
+        "id": 4,
+        "question": "Which renowned physicist was born in the year resulting from subtracting 21 from 1900?",
+        "answer": "albert einstein"
+    },
+    {
+        "id": 5,
+        "question":
+            "Which city hosted the Summer Olympics in the year obtained by subtracting 4 from the larger number between 2008 and 2012?",
+        "answer": "beijing"
+    }
+]

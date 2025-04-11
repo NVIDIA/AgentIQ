@@ -304,14 +304,14 @@ def test_validate_system_prompt_no_input():
 
 
 def test_validate_system_prompt_no_tools():
-    mock_prompt = '{tool_names}'
+    mock_prompt = '{tools}'
     with pytest.raises(ValueError) as ex:
         ReActAgentGraph.validate_system_prompt(mock_prompt)
     assert isinstance(ex.value, ValueError)
 
 
 def test_validate_system_prompt_no_tool_names():
-    mock_prompt = '{tools}'
+    mock_prompt = '{tool_names}'
     with pytest.raises(ValueError) as ex:
         ReActAgentGraph.validate_system_prompt(mock_prompt)
     assert isinstance(ex.value, ValueError)

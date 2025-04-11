@@ -26,7 +26,7 @@ from pydantic import BaseModel
 from pydantic import Field
 
 from aiq.agent.base import AgentDecision
-from aiq.agent.base import BaseAgent
+from aiq.agent.dual_node import DualNodeAgent
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class ToolCallAgentGraphState(BaseModel):
     messages: list[BaseMessage] = Field(default_factory=list)  # input and output of the Agent
 
 
-class ToolCallAgentGraph(BaseAgent):
+class ToolCallAgentGraph(DualNodeAgent):
     """Configurable LangGraph Tool Calling Agent. A Tool Calling Agent requires an LLM which supports tool calling.
     A tool Calling Agent utilizes the tool input parameters to select the optimal tool.  Supports handling tool errors.
     Argument "detailed_logs" toggles logging of inputs, outputs, and intermediate steps."""
@@ -106,7 +106,7 @@ class ToolCallAgentGraph(BaseAgent):
 
     async def build_graph(self):
         try:
-            self.graph = await super()._build_graph(state=ToolCallAgentGraphState)
+            await super()._build_graph(state_schema=ToolCallAgentGraphState)
             logger.info("Tool Calling Agent Graph built and compiled successfully")
             return self.graph
         except Exception as ex:
