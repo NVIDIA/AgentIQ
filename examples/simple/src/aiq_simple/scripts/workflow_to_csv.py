@@ -22,7 +22,12 @@ import json
 from pathlib import Path
 
 
-def customize_workflow_json(input_path: Path, output_path: Path):
+def customize_workflow_json(output_dir: Path, input_path: Path, output_path: Path):
+
+    # input and output paths are relative to the output_dir
+    input_path = output_dir / input_path
+    output_path = output_dir / output_path
+
     if not input_path.exists():
         raise FileNotFoundError(f"{input_path} does not exist")
 
@@ -45,11 +50,13 @@ def customize_workflow_json(input_path: Path, output_path: Path):
         writer.writeheader()
         writer.writerows(cleaned)
 
-    print(f"✅ Converted {input_path.name} to {output_path.name}")
+    print(f"Converted {input_path.name} to {output_path.name}")
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Convert workflow_output.json to workflow.csv")
+    # output_dir is a mandatory first argument
+    parser.add_argument("--output_dir", type=Path, required=True, help="Path to output directory")
     parser.add_argument("--input", type=Path, required=True, help="Path to workflow_output.json")
     parser.add_argument("--output", type=Path, required=True, help="Path to output CSV")
     return parser.parse_args()
@@ -57,4 +64,4 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    customize_workflow_json(args.input, args.output)
+    customize_workflow_json(args.output_dir, args.input, args.output)

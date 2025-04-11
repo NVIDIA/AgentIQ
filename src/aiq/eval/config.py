@@ -24,12 +24,12 @@ class EvaluationRunConfig(BaseModel):
     """
     config_file: Path
     dataset: str | None  # dataset file path can be specified in the config file
-    result_json_path: str
-    skip_workflow: bool
-    skip_completed_entries: bool
-    endpoint: str | None  # only used when running the workflow remotely
-    endpoint_timeout: int
-    reps: int
+    result_json_path: str = "$"
+    skip_workflow: bool = False
+    skip_completed_entries: bool = False
+    endpoint: str | None = None  # only used when running the workflow remotely
+    endpoint_timeout: int = 300
+    reps: int = 1
 
 
 class EvaluationRunOutput(BaseModel):

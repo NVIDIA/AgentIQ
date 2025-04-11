@@ -58,7 +58,9 @@ workflow:
 
 eval:
   general:
-    output_dir: ./.tmp/aiq/examples/simple/
+    output:
+      dir: ./.tmp/aiq/examples/simple/
+      cleanup: true
     dataset:
       _type: json
       file_path: examples/simple/data/langsmith.json

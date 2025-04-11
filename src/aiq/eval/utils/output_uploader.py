@@ -35,9 +35,10 @@ class OutputUploader:
     credentials.
     """
 
-    def __init__(self, output_config: EvalOutputConfig):
+    def __init__(self, output_config: EvalOutputConfig, job_id: str | None = None):
         self.output_config = output_config
         self._s3_client = None
+        self.job_id = job_id
 
     @property
     def s3_config(self):
@@ -63,6 +64,8 @@ class OutputUploader:
         local_dir = self.output_config.dir
         bucket = self.s3_config.bucket
         remote_prefix = self.output_config.remote_dir or ""
+        if self.job_id:
+            remote_prefix = str(Path(remote_prefix) / f"jobs/{self.job_id}")
 
         file_entries = []
         for root, _, files in os.walk(local_dir):
@@ -99,6 +102,7 @@ class OutputUploader:
         """
         Run custom Python scripts defined in the EvalOutputConfig.
         Each script is run with its kwargs passed as command-line arguments.
+        The output directory is passed as the first argument.
         """
         for script_name, script_config in self.output_config.custom_scripts.items():
             script_path = script_config.script
@@ -108,6 +112,9 @@ class OutputUploader:
 
             # use python interpreter
             args = [sys.executable, str(script_path)]
+            # add output directory as first keyword argument
+            args.append("--output_dir")
+            args.append(str(self.output_config.dir))
             if script_config.kwargs:
                 for key, value in script_config.kwargs.items():
                     args.append(f"--{key}")

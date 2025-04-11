@@ -65,16 +65,16 @@ eval:
   general:
     output:
       dir: ./.tmp/aiq/examples/simple_output/
+      remote_dir: output
       # Whether to cleanup the output directory before running the workflow
       cleanup: true
       custom_scripts:
         convert_workflow_to_csv:
           script: examples/simple/src/aiq_simple/scripts/workflow_to_csv.py
           kwargs:
-            input: ./.tmp/aiq/examples/simple_output/workflow_output.json
-            output: ./.tmp/aiq/examples/simple_output/workflow.csv
-      # Upload contents of output directory to remote storage using S3 credentials
-      remote_dir: output
+            # input and output files here are relative to the output dir
+            input: workflow_output.json
+            output: workflow.csv
       s3:
         endpoint_url: http://10.185.X.X:9000
         bucket: aiq-simple-bucket
@@ -82,14 +82,13 @@ eval:
         secret_key: fake-secret-key
     dataset:
       _type: json
-      # Download dataset from remote storage using S3 credentials
       remote_file_path: input/langsmith.json
       file_path: ./.tmp/aiq/examples/simple_input/langsmith.json
       s3:
         endpoint_url: http://10.185.X.X:9000
         bucket: aiq-simple-bucket
         access_key: fake-access-key
-        secret_key: fake-access-key
+        secret_key: fake-secret-key
     profiler:
       # Compute inter query token uniqueness
       token_uniqueness_forecast: true
