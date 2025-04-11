@@ -4,6 +4,7 @@
 
 [Aa]gentic
 AgentIQ
+[Aa]gno
 aiq
 API(s?)
 Arize
@@ -71,6 +72,7 @@ Milvus
 MLflow
 MLOps
 Morpheus
+[Mm]ultimodal
 [Nn]amespace(s?)
 NeMo
 nginx

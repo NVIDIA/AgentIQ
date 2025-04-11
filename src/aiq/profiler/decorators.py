@@ -33,6 +33,7 @@ _library_instrumented = {
     "langchain": False,
     "crewai": False,
     "semantic_kernel": False,
+    "agno": False,
 }
 
 callback_handler_var: ContextVar[Any | None] = ContextVar("callback_handler_var", default=None)
@@ -89,6 +90,14 @@ def set_framework_profiler_handler(
                 handler.instrument()
                 _library_instrumented["semantic_kernel"] = True
                 logger.info("SemanticKernel callback handler registered")
+
+            if LLMFrameworkEnum.AGNO in frameworks and not _library_instrumented["agno"]:
+                from aiq.profiler.callbacks.agno_callback_handler import AgnoProfilerHandler
+
+                handler = AgnoProfilerHandler()
+                handler.instrument()
+                _library_instrumented["agno"] = True
+                logger.info("Agno callback handler registered")
 
             # IMPORTANT: actually call the wrapped function as an async context manager
             async with func(workflow_config, builder) as result:

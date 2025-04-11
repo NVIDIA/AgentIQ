@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum
+# pylint: disable=unused-import
+# flake8: noqa
 
-
-class LLMFrameworkEnum(str, Enum):
-    LANGCHAIN = "langchain"
-    LLAMA_INDEX = "llama_index"
-    CREWAI = "crewai"
-    SEMANTIC_KERNEL = "semantic_kernel"
-    AGNO = "agno"
+# Import any tools which need to be automatically registered here
+from . import agno_personal_finance_function

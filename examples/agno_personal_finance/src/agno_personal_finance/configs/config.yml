@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+general:
+  use_uvloop: true
+
+functions:
+  serp_api_tool:
+    _type: serp_api_tool
+    # You can add your SerpAPI key here or use environment variables
+    # api_key: your_serp_api_key
+  
+  # Financial planning tool - references serp_api_tool by name
+  agno_personal_finance:
+    _type: agno_personal_finance
+    llm_name: nim_llm
+    serp_api_tool: serp_api_tool
+  
+llms:
+  nim_llm:
+    _type: nim
+    model_name: meta/llama-3.3-70b-instruct
+    temperature: 0.0
+
+workflow:
+  _type: agno_personal_finance
+  llm_name: nim_llm
+  serp_api_tool: serp_api_tool
+  verbose: true
+  retry_parsing_errors: true
+  max_retries: 3

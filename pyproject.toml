@@ -60,6 +60,7 @@ llama-index = ["agentiq-llama-index"]
 mem0ai = ["agentiq-mem0ai"]
 semantic-kernel = ["agentiq-semantic-kernel"]
 zep-cloud = ["agentiq-zep-cloud"]
+agno = ["agentiq-agno"]
 
 examples = [
   "aiq_email_phishing_analyzer",
@@ -69,7 +70,8 @@ examples = [
   "aiq_simple_calculator",
   "aiq_simple",
   "aiq_swe_bench",
-  "aiq_automated_description_generation"
+  "aiq_automated_description_generation",
+  "agno_personal_finance"
 ]
 
 profiling = [
@@ -92,6 +94,7 @@ agentiq-mem0ai = { workspace = true }
 agentiq-semantic-kernel = { workspace = true }
 agentiq-test = { workspace = true }
 agentiq-zep-cloud = { workspace = true }
+agentiq-agno = { workspace = true }
 
 # All examples here
 aiq_email_phishing_analyzer = { path = "examples/email_phishing_analyzer", editable = true }
@@ -102,6 +105,7 @@ aiq_simple = { path = "examples/simple", editable = true }
 aiq_simple_calculator = { path = "examples/simple_calculator", editable = true }
 aiq_swe_bench = { path = "examples/swe_bench", editable = true }
 aiq_automated_description_generation = { path = "examples/automated_description_generation", editable = true }
+agno_personal_finance = { path = "examples/agno_personal_finance", editable = true }
 
 
 [tool.uv.workspace]
@@ -873,7 +877,7 @@ skip = [
 ]
 known_first_party = ["aiq"]
 # Need to declare known third party for namespace packages which have the same name
-known_third_party = ["langchain", "llama_index", "crewai", "semantic_kernel", "mem0ai", "zep_cloud"]
+known_third_party = ["langchain", "llama_index", "crewai", "semantic_kernel", "mem0ai", "zep_cloud", "agno"]
 namespace_packages = ["aiq", "aiq.plugins"]
 
 [tool.flake8]

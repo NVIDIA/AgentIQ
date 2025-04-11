@@ -1,0 +1,44 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 64", "setuptools-scm>=8"]
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["aiq.*"]
+
+
+[tool.setuptools_scm]
+root = "../.."
+
+
+[project]
+name = "agentiq-agno"
+dynamic = ["version"]
+dependencies = [
+  # Keep package version constraints as open as possible to avoid conflicts with other packages. Always define a minimum
+  # version when adding a new package. If unsure, default to using `~=` instead of `==`. Does not apply to aiq packages.
+  # Keep sorted!!!
+  "agentiq",
+  "agno~=1.2.3",
+  "openai~=1.66",
+  "google-search-results~=2.4.2",
+]
+requires-python = ">=3.12"
+readme = "src/aiq/meta/pypi.md"
+description = "Subpackage for Agno integration in AgentIQ"
+keywords = ["ai", "rag", "agents"]
+classifiers = ["Programming Language :: Python"]
+
+
+[tool.uv]
+config-settings = { editable_mode = "compat" }
+
+
+[tool.uv.sources]
+agentiq = { workspace = true }
+
+
+[project.entry-points.'aiq.components']
+aiq_agno = "aiq.plugins.agno.register"
+aiq_agno_tools = "aiq.plugins.agno.tools.register"
