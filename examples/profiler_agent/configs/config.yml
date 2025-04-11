@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+general:
+  use_uvloop: true
+  tracing:
+    phoenix:
+      _type: phoenix
+      endpoint: http://localhost:6006/v1/traces
+      project: profiler_agent
+
+
+functions:
+  px_query:
+    _type: px_query
+    phoenix_url: http://localhost:6006
+    time_window_seconds: 600000
+  flow_chart:
+    _type: flow_chart
+  token_usage:
+    _type: token_usage
+  # response_composer is used as the final step of the ReWOO agent
+  response_composer:
+    _type: response_composer
+
+llms:
+  nim_llm:
+    _type: nim
+    model_name: meta/llama-3.3-70b-instruct
+    temperature: 0.0
+    max_tokens: 250
+  openai_llm:
+    _type: openai
+    model_name: gpt-4o
+    temperature: 0.0
+  qwq_32b:
+    _type: nim
+    model_name: qwen/qwq-32b
+    temperature: 0.0
+  nemotron_49b:
+    _type: nim
+    model_name: nvidia/llama-3.3-nemotron-super-49b-v1
+    temperature: 0.0
+
+workflow:
+  _type: profiler_agent
+  llm_name: nim_llm
+  max_retries: 3
+  max_iterations: 4
+  tools:
+    - px_query
+    - flow_chart
+    - token_usage
