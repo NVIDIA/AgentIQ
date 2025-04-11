@@ -77,13 +77,21 @@ class Workflow(FunctionBase[InputT, StreamingOutputT, SingleOutputT]):
         return self._entry_fn.has_single_output
 
     @asynccontextmanager
-    async def run(self, message: InputT):
+    async def run(self, message: InputT, entry_fn: str | None = None):
         """
         Called each time we start a new workflow run. We'll create
         a new top-level workflow span here.
         """
-        async with AIQRunner(input_message=message, entry_fn=self._entry_fn,
-                             context_state=self._context_state) as runner:
+
+        if entry_fn:
+            # check if entry_fn is in the keys of self.functions
+            if entry_fn not in self.functions:
+                raise ValueError(f"Entry function {entry_fn} not found in functions")
+            entry_fn = self.functions[entry_fn]
+        else:
+            entry_fn = self._entry_fn
+
+        async with AIQRunner(input_message=message, entry_fn=entry_fn, context_state=self._context_state) as runner:
 
             # The caller can `yield runner` so they can do `runner.result()` or `runner.result_stream()`
             yield runner

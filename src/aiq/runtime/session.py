@@ -103,7 +103,7 @@ class AIQSessionManager:
                 self._context_state.user_input_callback.reset(token_user_input)
 
     @asynccontextmanager
-    async def run(self, message):
+    async def run(self, message, entry_fn: str | None = None):
         """
         Start a workflow run
         """
@@ -112,5 +112,5 @@ class AIQSessionManager:
             for k, v in self._saved_context.items():
                 k.set(v)
 
-            async with self._workflow.run(message) as runner:
+            async with self._workflow.run(message, entry_fn) as runner:
                 yield runner

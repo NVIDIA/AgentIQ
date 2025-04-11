@@ -78,12 +78,13 @@ class EvaluationRun:  # pylint: disable=too-many-public-methods
         # Run the workflow
         jsonpath_expr = parse(self.config.result_json_path)
         stop_event = asyncio.Event()
+        entry_fn = self.eval_config.general.entry_fn if self.eval_config.general.entry_fn else None
 
         async def run_one(item: EvalInputItem):
             if stop_event.is_set():
                 return "", []
 
-            async with session_manager.run(item.input_obj) as runner:
+            async with session_manager.run(item.input_obj, entry_fn) as runner:
                 try:
                     # Start usage stats and intermediate steps collection in parallel
                     intermediate_future = pull_intermediate()
@@ -143,6 +144,10 @@ class EvaluationRun:  # pylint: disable=too-many-public-methods
 
     async def run_workflow_remote(self):
         from aiq.eval.remote_workflow import EvaluationRemoteWorkflowHandler
+
+        if self.eval_config.general.entry_fn:
+            logger.warning("Entry function is not supported for remote workflows. Skipping entry function.")
+
         handler = EvaluationRemoteWorkflowHandler(self.config, self.eval_config.general.max_concurrency)
         await handler.run_workflow_remote(self.eval_input)
 

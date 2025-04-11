@@ -87,6 +87,26 @@ eval:
         disable: true
 ```
 
+### Evaluating Other Functions
+It is sometimes useful to evaluate functions defined in the `functions` section of your configuration file that are
+your main workflow function.
+
+To set custom entrypoint functions for evaluation, modify the `general` section of your `eval` configuration as follows: 
+```yaml
+eval:
+  general:
+    output_dir: ./.tmp/aiq/examples/simple/
+    entry_fn: webpage_query
+    dataset:
+      _type: json
+      file_path: examples/simple/data/langsmith.json
+```
+The above configuration, for the `simple` example, sets the entrypoint function to `webpage_query`. 
+The `webpage_query` function is defined in the `functions` section of the configuration file. 
+The evaluation will run the `webpage_query` function on the dataset provided in the `file_path`.
+
+**NOTE**: Custom entrypoints are not supported for remote evaluations.
+
 ### Filtering Datasets
 While evaluating large datasets, you can filter the dataset to a
 smaller subset by allowing or denying entries with the `eval.general.dataset.filter`

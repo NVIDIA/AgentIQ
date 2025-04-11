@@ -52,6 +52,7 @@ class EvalGeneralConfig(BaseModel):
 
     # Output directory for the workflow and evaluation results
     output_dir: Path = Path("/tmp/aiq/examples/default/")
+    entry_fn: str | None = None
 
     # If present overrides output_dir
     output: EvalOutputConfig | None = None

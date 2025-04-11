@@ -28,5 +28,9 @@ class ConsoleFrontEndConfig(FrontEndBaseConfig, name="console"):
     input_query: list[str] | None = Field(default=None,
                                           alias="input",
                                           description="A single input to submit the the workflow.")
+
     input_file: Path | None = Field(default=None,
                                     description="Path to a json file of inputs to submit to the workflow.")
+
+    entry_fn: str | None = Field(default=None,
+                                 description="Custom function for run. If none, Workflow function will be used")

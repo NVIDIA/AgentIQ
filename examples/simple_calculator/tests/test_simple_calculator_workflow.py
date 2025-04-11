@@ -78,3 +78,48 @@ async def test_division_tool_workflow():
 
         result = result.lower()
         assert "4" in result
+
+
+@pytest.mark.e2e
+async def test_custom_entry_points():
+    """
+    Test the custom entry points for the simple calculator workflow.
+    """
+
+    package_name = inspect.getmodule(DivisionToolConfig).__package__
+
+    config_file: Path = importlib.resources.files(package_name).joinpath("configs", "config.yml").absolute()
+
+    async with load_workflow(config_file) as workflow:
+
+        async with workflow.run("4 and 5", "calculator_inequality") as runner:
+
+            result = await runner.result(to_type=str)
+
+        result = result.lower()
+        assert result == "first number 4 is less than the second number 5"
+
+        async with workflow.run("4 and 5", "calculator_multiply") as runner:
+
+            result = await runner.result(to_type=str)
+
+        result = result.lower()
+        assert result == "the product of 4 * 5 is 20"
+
+
+@pytest.mark.e2e
+async def test_custom_entry_point_invalid():
+    """
+    Tests that provided a function name that does not exist in the workflow
+    raises a ValueError.
+    """
+
+    package_name = inspect.getmodule(DivisionToolConfig).__package__
+
+    config_file: Path = importlib.resources.files(package_name).joinpath("configs", "config.yml").absolute()
+
+    async with load_workflow(config_file) as workflow:
+
+        with pytest.raises(ValueError, match="Entry function foo not found in functions"):
+            async with workflow.run("4 and 5", "foo") as runner:
+                _ = await runner.result(to_type=str)

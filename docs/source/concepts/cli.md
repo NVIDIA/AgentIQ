@@ -116,6 +116,8 @@ the configuration file can be overridden by command line using the `--override` 
 configuration hierarchy to the field being overridden. The run command can be useful running one off tests when
 debugging a workflow debugging. When invoking the run command, the workflow will follow the same harness as the
 other workflow launch commands. This simplifies the debugging process when transitioning from development to production.
+Setting the `--entry_fn` parameter allows the execution of any other function defined in the configuration
+that is not the default `workflow` function. This is useful for testing and debugging specific components of a workflow.
 
 The `aiq start console` help utility provides a brief description of each option to describe is usage.
 
@@ -123,25 +125,35 @@ The `aiq start console` help utility provides a brief description of each option
 $ aiq start console --help
 Usage: aiq start console [OPTIONS]
 
+  Run an AgentIQ workflow using the console front end.
+
 Options:
-  --config_file FILE         A JSON/YAML file that sets the parameters for the
-                             workflow.  [required]
-  --override <TEXT TEXT>...  Override config values using dot notation (e.g.,
-                             --override llms.nim_llm.temperature 0.7)
-  --input TEXT               A single input to submit the the workflow.
-  --input_file FILE          Path to a json file of inputs to submit to the
+  --config_file FILE         A JSON/YAML file that sets the
+                             parameters for the workflow.  [required]
+  --override <TEXT TEXT>...  Override config values using dot
+                             notation (e.g., --override
+                             llms.nim_llm.temperature 0.7)
+  --input TEXT               A single input to submit the the
                              workflow.
+  --input_file FILE          Path to a json file of inputs to submit
+                             to the workflow.
+  --entry_fn TEXT            Custom function for run. If none,
+                             Workflow function will be used
   --help                     Show this message and exit.
+
 ```
 
 ## Run
 
-The `aiq run` is an alias for the `aiq start console` command and will run an AgentIQ workflow from a provided configuration file against inputs supplied at the
-command line or from file using the `--inputs` and `--input_file` options, respectively. Additionally, fields in the
-configuration file can be overridden by command line using the `--override` flag and dot notation to traverse to the
-configuration hierarchy to the field being overridden. The run command can be useful running one off tests when
-debugging a workflow debugging. When invoking the run command, the workflow will follow the same harness as the
-other workflow launch commands. This simplifies the debugging process when transitioning from development to production.
+The `aiq run` is an alias for the `aiq start console` command and will run an AgentIQ workflow from a provided 
+configuration file against inputs supplied at the
+command line or from file using the `--inputs` and `--input_file` options, respectively. The `--entry_fn` parameter 
+allows the execution of any other function defined in the configuration that is not the default `workflow` function.
+Additionally, fields in the configuration file can be overridden by command line using the `--override` flag and dot 
+notation to traverse to the configuration hierarchy to the field being overridden. The run command can be useful 
+running one off tests when debugging a workflow debugging. When invoking the run command, the workflow 
+will follow the same harness as the other workflow launch commands. This simplifies the debugging 
+process when transitioning from development to production.
 
 The `aiq run` help utility provides a brief description of each option to describe is usage.
 
@@ -149,15 +161,22 @@ The `aiq run` help utility provides a brief description of each option to descri
 $ aiq run --help
 Usage: aiq run [OPTIONS]
 
+  Run an AgentIQ workflow using the console front end.
+
 Options:
-  --config_file FILE         A JSON/YAML file that sets the parameters for the
-                             workflow.  [required]
-  --override <TEXT TEXT>...  Override config values using dot notation (e.g.,
-                             --override llms.nim_llm.temperature 0.7)
-  --input TEXT               A single input to submit the the workflow.
-  --input_file FILE          Path to a json file of inputs to submit to the
+  --config_file FILE         A JSON/YAML file that sets the
+                             parameters for the workflow.  [required]
+  --override <TEXT TEXT>...  Override config values using dot
+                             notation (e.g., --override
+                             llms.nim_llm.temperature 0.7)
+  --input TEXT               A single input to submit the the
                              workflow.
+  --input_file FILE          Path to a json file of inputs to submit
+                             to the workflow.
+  --entry_fn TEXT            Custom function for run. If none,
+                             Workflow function will be used
   --help                     Show this message and exit.
+
 ```
 
 ## Serve

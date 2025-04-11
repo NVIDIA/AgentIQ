@@ -81,7 +81,7 @@ class ConsoleFrontEndPlugin(SimpleFrontEndPluginBase[ConsoleFrontEndConfig]):
             async def run_single_query(query):
 
                 async with session_manager.session(user_input_callback=prompt_for_input_cli) as session:
-                    async with session.run(query) as runner:
+                    async with session.run(query, self.front_end_config.entry_fn) as runner:
                         base_output = await runner.result(to_type=str)
 
                         return base_output
@@ -97,7 +97,7 @@ class ConsoleFrontEndPlugin(SimpleFrontEndPluginBase[ConsoleFrontEndConfig]):
             # Run the workflow
             with open(self.front_end_config.input_file, "r", encoding="utf-8") as f:
 
-                async with session_manager.workflow.run(f) as runner:
+                async with session_manager.workflow.run(f, self.front_end_config.entry_fn) as runner:
                     runner_outputs = await runner.result(to_type=str)
         else:
             assert False, "Should not reach here. Should have been caught by pre_run"
