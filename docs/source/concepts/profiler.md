@@ -67,6 +67,47 @@ async def webquery_tool(config: WebQueryToolConfig, builder: Builder):
 Once workflows are instrumented, the profiler will collect usage statistics in real time and store them for offline analysis for any LLM invocations or tool calls your workflow makes during execution. Runtime telemetry
 is stored in a `intermediate_steps_stream` context variable during runtime. AgentIQ has a subscriber that will read intermediate steps through eval.
 
+Even if a function isn’t one of the built-in AgentIQ “Functions”, you can still profile it with our simple decorator. The `@track_function` decorator helps you capture details such as when a function starts and ends, its input arguments, and its output—even if the function is asynchronous, a generator, or a class method.
+
+#### How It Works
+
+The decorator automatically logs key events in three stages:
+- **`SPAN_START`:** Logged when the function begins executing. It records the serialized inputs.
+- **`SPAN_CHUNK`:** For generator functions, each yielded value is captured as it’s produced.
+- **`SPAN_END`:** Logged when the function finishes executing. It records the serialized output.
+
+It supports all kinds of functions:
+- **Synchronous functions & methods**
+- **Asynchronous functions**
+- **Generators (both `sync` and `async`)**
+
+#### Key Benefits
+
+- **Broad Compatibility:**  
+  Use this decorator on any Python function, regardless of its type.
+
+- **Simple Metadata:**  
+  Optionally pass a dictionary of metadata to add extra context about the function call.
+
+- **Automatic Data Serialization:**  
+  The decorator converts input arguments and outputs into a `JSON`-friendly format (with special handling for Pydantic models), making the data easier to analyze.
+
+- **Reactive Event Streaming:**  
+  All profiling events are pushed to the `AgentIQ` intermediate step stream, so you can subscribe and monitor events in real time.
+
+#### How to Use
+
+Just decorate your custom function with `@track_function` and provide any optional metadata if needed:
+
+```python
+from aiq.profiler.decorators.function_tracking import track_function
+
+@track_function(metadata={"action": "compute", "source": "custom_function"})
+def my_custom_function(a, b):
+    # Your function logic here
+    return a + b
+```
+
 ### Step 2: Configuring the Profiler with Eval
 The profiler can be run through the `aiq eval` command. The profiler can be configured through the `profiler` section of the workflow configuration file. The following is an example `eval` configuration section from the `simple` workflow which shows how to enable the profiler:
 

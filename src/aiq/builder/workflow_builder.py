@@ -58,7 +58,7 @@ from aiq.data_models.memory import MemoryBaseConfig
 from aiq.data_models.retriever import RetrieverBaseConfig
 from aiq.data_models.telemetry_exporter import TelemetryExporterBaseConfig
 from aiq.memory.interfaces import MemoryEditor
-from aiq.profiler.decorators import chain_wrapped_build_fn
+from aiq.profiler.decroators.framework_wrapper import chain_wrapped_build_fn
 from aiq.profiler.utils import detect_llm_frameworks_in_build_fn
 
 logger = logging.getLogger(__name__)

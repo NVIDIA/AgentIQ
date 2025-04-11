@@ -35,6 +35,7 @@ class IntermediateStepCategory(str, Enum):
     TASK = "TASK"
     FUNCTION = "FUNCTION"
     CUSTOM = "CUSTOM"
+    SPAN = "SPAN"
 
 
 class IntermediateStepType(str, Enum):
@@ -51,6 +52,9 @@ class IntermediateStepType(str, Enum):
     FUNCTION_END = "FUNCTION_END"
     CUSTOM_START = "CUSTOM_START"
     CUSTOM_END = "CUSTOM_END"
+    SPAN_START = "SPAN_START"
+    SPAN_CHUNK = "SPAN_CHUNK"
+    SPAN_END = "SPAN_END"
 
 
 class IntermediateStepState(str, Enum):
@@ -84,6 +88,9 @@ class TraceMetadata(BaseModel):
     tool_inputs: typing.Any | None = None
     tool_outputs: typing.Any | None = None
     tool_info: typing.Any | None = None
+    span_inputs: typing.Any | None = None
+    span_outputs: typing.Any | None = None
+    provided_metadata: typing.Any | None = None
 
     # Allow extra fields in the model_config to support derived models
     model_config = ConfigDict(extra="allow")
@@ -140,6 +147,12 @@ class IntermediateStepPayload(BaseModel):
                 return IntermediateStepCategory.CUSTOM
             case IntermediateStepType.CUSTOM_END:
                 return IntermediateStepCategory.CUSTOM
+            case IntermediateStepType.SPAN_START:
+                return IntermediateStepCategory.SPAN
+            case IntermediateStepType.SPAN_CHUNK:
+                return IntermediateStepCategory.SPAN
+            case IntermediateStepType.SPAN_END:
+                return IntermediateStepCategory.SPAN
             case _:
                 raise ValueError(f"Unknown event type: {self.event_type}")
 
@@ -171,6 +184,12 @@ class IntermediateStepPayload(BaseModel):
             case IntermediateStepType.CUSTOM_START:
                 return IntermediateStepState.START
             case IntermediateStepType.CUSTOM_END:
+                return IntermediateStepState.END
+            case IntermediateStepType.SPAN_START:
+                return IntermediateStepState.START
+            case IntermediateStepType.SPAN_CHUNK:
+                return IntermediateStepState.CHUNK
+            case IntermediateStepType.SPAN_END:
                 return IntermediateStepState.END
             case _:
                 raise ValueError(f"Unknown event type: {self.event_type}")
